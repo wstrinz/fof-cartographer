@@ -1,0 +1,183 @@
+<html>
+<head>
+
+<title> A Basic GeoExt Page </title>
+<script src="http://extjs.cachefly.net/ext-3.4.0/adapter/ext/ext-base.js" type="text/javascript"></script>
+<script src="http://extjs.cachefly.net/ext-3.4.0/ext-all.js"  type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"></link>
+<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/examples/shared/examples.css" />
+<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
+<script src="GeoExt/lib/GeoExt.js" type="text/javascript"></script>
+<link rel="stylesheet" type="text/css" href="GeoExt/resources/css/geoext-all-debug.css"></link>
+
+<script type="text/javascript">
+    Ext.onReady(function() {
+        var map = new OpenLayers.Map("map",{maxExtent: new OpenLayers.Bounds(1, 1, 55, 55)});
+        var crop_text = new OpenLayers.Layer.WMS(
+            "Crop Name",
+            'http://'+ window.location.hostname + ':4567/map/a',
+            {
+                layers: "crop_text",
+                transparent: "true"
+            },
+            {isBaseLayer: false}
+
+        );
+
+        var farm_text_field = new OpenLayers.Layer.WMS(
+            "Farm name (field)",
+            'http://'+ window.location.hostname + ':8000/',
+            {
+                layers: "farm_text_field",
+                transparent: "true"
+            },
+            {
+                isBaseLayer: false,
+                visibility: false
+
+            }
+        );
+
+        var farm_text = new OpenLayers.Layer.WMS(
+            "Farm name (farm)",
+            'http://'+ window.location.hostname + ':8000/',
+            {
+                layers: "farm_text",
+                transparent: "true"
+            },
+            {isBaseLayer: false}
+        );
+
+        var SOC_text = new OpenLayers.Layer.WMS(
+            "SOC value",
+            'http://'+ window.location.hostname + ':8000/',
+            {
+                layers: "SOC_text",
+                transparent: "true"
+            },
+            {isBaseLayer: false}
+        );
+
+        var GBI_text = new OpenLayers.Layer.WMS(
+            "GBI value",
+            'http://'+ window.location.hostname + ':8000/',
+            {
+                layers: "GBI_text",
+                transparent: "true"
+            },
+            {
+                isBaseLayer: false,
+                visibility: false
+            }
+        );
+
+        var farm_area = new OpenLayers.Layer.WMS(
+            "Farm",
+            'http://'+ window.location.hostname + ':8000/',
+            {layers: "farm_area"}
+        );
+
+        var crop_area = new OpenLayers.Layer.WMS(
+            "Crop",
+            'http://'+ window.location.hostname + ':8000/',
+            {layers: "crop_area"}
+        );
+
+        var SOC_area = new OpenLayers.Layer.WMS(
+            "SOC",
+            'http://'+ window.location.hostname + ':8000/',
+            {layers: "SOC_area"}
+        );
+
+        var GBI_area = new OpenLayers.Layer.WMS(
+            "GBI",
+            'http://'+ window.location.hostname + ':8000/',
+            {layers: "GBI_area"}
+        );
+
+        map.addLayer(farm_text_field);
+        map.addLayer(farm_text);
+        map.addLayer(SOC_text);
+        map.addLayer(GBI_text);
+        map.addLayer(crop_text);
+        map.addLayer(crop_area);
+        map.addLayer(farm_area);
+        map.addLayer(SOC_area);
+        map.addLayer(GBI_area);
+
+        mp = new GeoExt.MapPanel({
+            renderTo: 'gxmap',
+            height: 600,
+            width: 800,
+            x: 0,
+            y: 0,
+            map: map,
+            title: 'A Simple GeoExt Map'
+        });
+
+        tree = new Ext.tree.TreePanel({
+            renderTo: "tree",
+            root: {
+                text: 'Map Layers',
+                // isLeaf: false,
+                nodeType: "async",
+                expanded: true,
+                children:[
+                    {
+                        nodeType: 'gx_layercontainer',
+                        text: 'Farm Labels',
+                        layerStore: mp.layers,
+                        expanded: true,
+                        loader: {
+                            filter: function(record) {
+                                return (record.get("layer").name.indexOf("Farm") !== -1 && !record.getLayer().isBaseLayer)
+                            }
+                        }
+                    },
+                    {
+                        nodeType: 'gx_layercontainer',
+                        text: 'Attribute Labels',
+                        layerStore: mp.layers,
+                        checked: false,
+                        expanded: true,
+                        loader: {
+                            filter: function(record) {
+                                layer = record.get("layer").name
+                                return ((layer.indexOf("SOC") !== -1 || layer.indexOf("Crop Name") !== -1 || layer.indexOf("GBI") !== -1 ) && !record.getLayer().isBaseLayer)
+                            }
+                        }
+                    },
+                    {
+                        nodeType: 'gx_layercontainer',
+                        text: "Area Layers",
+                        layerStore: mp.layers,
+                        expanded: true,
+                        loader: {
+                            filter: function(record) {
+                                return record.get("layer").isBaseLayer
+                            }
+                        }
+
+                    }
+                ]
+            },
+
+            enableDD: true,
+            width: 170,
+            height: 300,
+            height: 300,
+            floating: true,
+            x: 900,
+            y: 0
+        });
+
+    });
+</script>
+</head>
+<body>
+<div style="position: relative;">
+    <div id="gxmap"></div>
+    <div id="tree"></div>
+</div>
+</body>
+</html>

@@ -216,7 +216,7 @@ class MapMaker
 
     map.zoom_to_box(map.layers.first.envelope)
     open('xmlmap.xml','w'){|f| f.write map.to_xml }
-    map.render_to_file("rooms/#{@room}/#{@room}_#{property}.png")
+    map.render_to_file("#{@room}_#{property}.png")
   end
 
   def render_crops(shapefile)
@@ -268,7 +268,7 @@ class MapMaker
     end
 
     map.zoom_to_box(map.layers.first.envelope)
-    map.render_to_file("rooms/#{@room}/#{@room}_crop.png")
+    map.render_to_file("#{@room}_crop.png")
   end
 
   def render_farms(shapefile, data)
@@ -313,7 +313,7 @@ class MapMaker
       end
     end
     map.zoom_to_box(map.layers.first.envelope)
-    map.render_to_file("rooms/#{@room}/#{@room}_farms.png")
+    map.render_to_file("#{@room}_farms.png")
   end
 
   def field_shapefile(data)
@@ -360,11 +360,11 @@ class MapMaker
     ]
 
     %w{shp shx dbf png}.each{|ext|
-      File.delete "rooms/#{@room}/#{@room}_places.#{ext}" if File.exist? "rooms/#{@room}/#{@room}_places.#{ext}"
-      File.delete "rooms/#{@room}/#{@room}_places_points.#{ext}" if File.exist?("rooms/#{@room}/#{@room}_places_points.#{ext}")
+      File.delete "#{@room}_places.#{ext}" if File.exist? "#{@room}_places.#{ext}"
+      File.delete "#{@room}_places_points.#{ext}" if File.exist?("#{@room}_places_points.#{ext}")
     }
 
-    shpfile = Shp4r::ShpFile.create("rooms/#{@room}/#{@room}_places.shp",Shp4r::ShpType::POLYLINE,dbf_fields)
+    shpfile = Shp4r::ShpFile.create("#{@room}_places.shp",Shp4r::ShpType::POLYLINE,dbf_fields)
 
     polys.each_with_index{|poly,i|
       shpfile.transaction do |tr|
@@ -374,7 +374,7 @@ class MapMaker
 
     shpfile.close
 
-    shp2 = Shp4r::ShpFile.create("rooms/#{@room}/#{@room}_places_points.shp",Shp4r::ShpType::POINT,dbf_fields)
+    shp2 = Shp4r::ShpFile.create("#{@room}_places_points.shp",Shp4r::ShpType::POINT,dbf_fields)
 
     mids.each_with_index{|mid,i|
       shp2.transaction do |tr|
@@ -428,11 +428,11 @@ class MapMaker
 
 
     %w{shp shx dbf png}.each{|ext|
-      File.delete "rooms/#{@room}/#{@room}_farms.#{ext}" if File.exist? "rooms/#{@room}/#{@room}_farms.#{ext}"
-      File.delete "rooms/#{@room}/#{@room}_farms_points.#{ext}" if File.exist?("rooms/#{@room}/#{@room}_farms_points.#{ext}")
+      File.delete "#{@room}_farms.#{ext}" if File.exist? "#{@room}_farms.#{ext}"
+      File.delete "#{@room}_farms_points.#{ext}" if File.exist?("#{@room}_farms_points.#{ext}")
     }
 
-    shpfile = Shp4r::ShpFile.create("rooms/#{@room}/#{@room}_farms.shp",Shp4r::ShpType::POLYLINE,dbf_fields)
+    shpfile = Shp4r::ShpFile.create("#{@room}_farms.shp",Shp4r::ShpType::POLYLINE,dbf_fields)
     shpfile.transaction do |tr|
       polys.each_with_index{|poly,i|
         tr.add(Shp4r::ShpRecord.new(poly,'FARM'=>farm_names[i]))
@@ -442,7 +442,7 @@ class MapMaker
 
     shpfile.close
 
-    shpfile = Shp4r::ShpFile.create("rooms/#{@room}/#{@room}_farms_points.shp",Shp4r::ShpType::POINT,dbf_fields)
+    shpfile = Shp4r::ShpFile.create("#{@room}_farms_points.shp",Shp4r::ShpType::POINT,dbf_fields)
 
     shpfile.transaction do |tr|
       mids.each_with_index{|mid,i|
@@ -457,10 +457,10 @@ class MapMaker
     field_shapefile(data)
     farm_shapefile(data)
 
-    render_color_scaled_map('GBI',"rooms/#{@room}/#{@room}_places.shp")
-    render_color_scaled_map('SOC',"rooms/#{@room}/#{@room}_places.shp",0..190)
-    render_crops("rooms/#{@room}/#{@room}_places.shp")
-    render_farms("rooms/#{@room}/#{@room}_farms.shp",data)
+    render_color_scaled_map('GBI',"#{@room}_places.shp")
+    render_color_scaled_map('SOC',"#{@room}_places.shp",0..190)
+    render_crops("#{@room}_places.shp")
+    render_farms("#{@room}_farms.shp",data)
   end
 
 
@@ -502,23 +502,29 @@ if ARGV[0]
   if File.exist?(ARGV[0])
     field_data = JSON.parse(IO.read(ARGV[0]))
   else
-    field_data = JSON.parse(IO.read(File.dirname(__FILE__) + '/../rooms/#{@room}/test.json'))
+    field_data = JSON.parse(IO.read(File.dirname(__FILE__) + '/../test.json'))
   end
   # field_data["fields"] = field_data["fields"].select{|f| f["farm"] == "Mo Farmer"}
 
   m = MapMaker.new
   # m.render_fields field_data
   @room = field_data["clientID"]
+
+  wd = "#{File.dirname(__FILE__)}/rooms/#{@room}"
+  Dir.chdir wd
+  puts `pwd`
+
+
   m.field_shapefile(field_data)
   m.farm_shapefile(field_data)
-  map_str = m.one_xml_map(field_data,"rooms/#{@room}/#{@room}_farms.shp","rooms/#{@room}/#{@room}_places.shp")
-  open("#{File.dirname(__FILE__)}/rooms/#{@room}/#{@room}.xml",'w'){|f| f.write map_str }
+  map_str = m.one_xml_map(field_data,"#{@room}_farms.shp","#{@room}_places.shp")
+  open("#{@room}.xml",'w'){|f| f.write map_str }
 
-  # `eog rooms/#{@room}/noNameRoom_farms.png`
+  # `eog noNameRoom_farms.png`
 
-  # field_data = JSON.parse(IO.read(File.dirname(__FILE__) + '/../rooms/#{@room}/test.json'))
+  # field_data = JSON.parse(IO.read(File.dirname(__FILE__) + '/../test.json'))
   # m = MapMaker.new
   # m.render_fields field_data
 
-  # `eog rooms/#{@room}/noNameRoom_farms.png`
+  # `eog noNameRoom_farms.png`
 end
