@@ -15,55 +15,47 @@ helpers do
 
   def restart_ogc(room)
     puts "restarting ogc for room #{room}"
+
+    # spawn do
+    @@ogc_pid ||= nil
+
+    if @@ogc_pid
+      # puts "killing #{@@ogc_pid}"
+      # `kill -9 #{@@ogc_pid}`
+      Process.kill 2, @@ogc_pid + 1
+      Process.kill 2, @@ogc_pid
+      # Process.wait @@ogc_pid + 1
+      puts "done"
+      # Thread.new do
+      # sleep(2)
+
+      # @@ogc_pid = fork { exec "cd OGCServer && ./bin/ogcserver-local.py ../rooms/#{room}/#{room}.xml" ; Signal.trap("INT") { puts "stop" } }
+    # else
+    end
+    @@ogc_pid = spawn "cd OGCServer && ./bin/ogcserver-local.py ../rooms/#{room}/#{room}.xml"
+
+    # Process.detach(@@ogc_pid)
+    puts @@ogc_pid
+
+    # end
+  end
+
+  def room_port(room)
+    8000
   end
 end
 
-# get '/map/:room' do
-#   data = <<-EOF
-# {
-#   "event": "fieldDump",
-#   "clientID": "a",
-#   "fields": [{
-#     "farm": "a",
-#     "pesticide": false,
-#     "SOM": 101.5501495391146,
-#     "yield": 9.977123534579679,
-#     "GBI": 0.9972951823405465,
-#     "year": 6,
-#     "fertilizer": false,
-#     "till": false,
-#     "crop": "GRASS",
-#     "y": 1,
-#     "x": 1
-#   }, {
-#     "farm": "a",
-#     "pesticide": false,
-#     "SOM": 52.62828919547201,
-#     "yield": 0.0,
-#     "GBI": 0.9972951823405465,
-#     "year": 6,
-#     "fertilizer": false,
-#     "till": false,
-#     "crop": "GRASS",
-#     "y": 1,
-#     "x": 2
-#   }]
-# }
-#   EOF
-#   # puts request.host_with_port
-#   puts "http://#{request.host_with_port}/map/#{params[:room]}"
-#   # RestClient.post("http://#{request.host_with_port}/map/#{params[:room]}", data: data )
-#   RestClient.post("http://localhost:4567/map/a", data: data )
-# end
 
 get '/' do
   send_file 'views/geo-ext.html'
 end
 
 get '/map/:room' do
+  @@ogc_pid ||= nil
+  restart_ogc(params[:room]) unless @@ogc_pid
   newp = '?' + request.env['rack.request.query_hash'].map{|k,v| "#{k}=#{v}"}.join("&")
-  port = "8000"
-  # puts "localhost:8000/#{newp}"
+  port = room_port(params[:room])
+  puts "localhost:8000/#{newp}"
   content_type "image/png"
   open("http://localhost:#{port}/#{newp}").read
 end
