@@ -15,7 +15,7 @@
         var map = new OpenLayers.Map("map",{maxExtent: new OpenLayers.Bounds(1, 1, 55, 55)});
         var crop_text = new OpenLayers.Layer.WMS(
             "Crop Name",
-            'http://'+ window.location.hostname + ':4567/map/a',
+            'http://'+ window.location.hostname + ':9999/map/a',
             {
                 layers: "crop_text",
                 transparent: "true"
