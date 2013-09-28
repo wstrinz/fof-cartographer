@@ -112,7 +112,21 @@
             x: 0,
             y: 0,
             map: map,
-            title: 'A Simple GeoExt Map'
+            title: 'A Simple GeoExt Map',
+	    tools:[{
+                id:'refresh',
+                qtip: 'Refresh form Data',
+                // hidden:true,
+                handler: function(event, toolEl, panel){
+                    var map = panel.map;
+                      console.log(map)
+		      
+		    for (var i = 0; i < map.layers.length; i++) {
+                      	console.log(map.layers[i])
+			map.layers[i].redraw({force: true});
+                    }// refresh logic
+                }
+            }],
         });
 
         tree = new Ext.tree.TreePanel({
