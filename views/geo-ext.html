@@ -12,7 +12,7 @@
 
 <script type="text/javascript">
     Ext.onReady(function() {
-        var map = new OpenLayers.Map("map",{maxExtent: new OpenLayers.Bounds(1, 1, 55, 55)});
+        var map = new OpenLayers.Map("map");
         var crop_text = new OpenLayers.Layer.WMS(
             "Crop Name",
             'http://'+ window.location.hostname + ':9999/map/a',
@@ -120,7 +120,7 @@
                 handler: function(event, toolEl, panel){
                     var map = panel.map;
                       // console.log(map)
-		      
+
 		                for (var i = 0; i < map.layers.length; i++) {
                       // console.log(map.layers[i])
                       map.layers[i].redraw({force: true});
