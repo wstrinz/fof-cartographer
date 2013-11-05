@@ -8,46 +8,22 @@ require 'cgi'
 
 helpers do
   def make_map(file)
-    # open(Rails.root.to_s + "/public/map/#{json["clientID"]}_json.json",'w'){|f| f.write json.to_json}
-    # maker = MapMaker.new
-
     `ruby map_maker.rb #{file}`
   end
 
   def restart_ogc(room)
+    ChildProcess.posix_spawn = true
     puts "restarting ogc for room #{room}"
 
-    # spawn do
     @@ogc_pid ||= nil
 
     if @@ogc_pid
-      # puts "killing #{@@ogc_pid}"
-      # `kill -9 #{@@ogc_pid}`
-      # Process.kill 2, @@ogc_pid + 1
       @@ogc_pid.stop
-      # Process.kill 2, @@ogc_pid
-      # pids = `ps -A | grep defunct`.scan(/\d+/).reject{|p| p.size < 3}
-      # pids.each{|p|
-      #   # puts "#{p.to_i}"
-      #   Process.kill 2, p.to_i
-      # }
-      # puts "#{pids}"
       puts "done"
-      # Thread.new do
-      # sleep(2)
-
-    # else
     end
-    # @@ogc_pid = spawn "cd OGCServer && ./bin/ogcserver-local.py ../rooms/#{room}/#{room}.xml"
     @@ogc_pid = ChildProcess.build("./bin/ogcserver-local.py", "../rooms/#{room}/#{room}.xml")
     @@ogc_pid.cwd = "OGCServer"
     @@ogc_pid.start
-    # @@ogc_pid = fork { exec "cd OGCServer && ./bin/ogcserver-local.py ../rooms/#{room}/#{room}.xml"}
-
-    # Process.detach(@@ogc_pid)
-    # puts @@ogc_pid
-
-    # end
   end
 
   def room_port(room)
