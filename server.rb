@@ -32,7 +32,7 @@ helpers do
 end
 
 
-get '/' do
+get '/show/:room' do
   send_file 'views/geo-ext.html'
 end
 

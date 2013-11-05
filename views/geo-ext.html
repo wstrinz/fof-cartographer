@@ -7,7 +7,7 @@
 <link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/resources/css/ext-all.css"></link>
 <link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.4.0/examples/shared/examples.css" />
 <script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
-<script src="GeoExt/lib/GeoExt.js" type="text/javascript"></script>
+<script src="/GeoExt/lib/GeoExt.js" type="text/javascript"></script>
 <link rel="stylesheet" type="text/css" href="GeoExt/resources/css/geoext-all-debug.css"></link>
 
 <script type="text/javascript">
@@ -112,7 +112,21 @@
             x: 0,
             y: 0,
             map: map,
-            title: 'A Simple GeoExt Map'
+            title: 'A Simple GeoExt Map',
+	    tools:[{
+                id:'refresh',
+                qtip: 'Refresh form Data',
+                // hidden:true,
+                handler: function(event, toolEl, panel){
+                    var map = panel.map;
+                      // console.log(map)
+		      
+		                for (var i = 0; i < map.layers.length; i++) {
+                      // console.log(map.layers[i])
+                      map.layers[i].redraw({force: true});
+                    }// refresh logic
+                }
+            }],
         });
 
         tree = new Ext.tree.TreePanel({
