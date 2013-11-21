@@ -13,9 +13,10 @@
 <script type="text/javascript">
     Ext.onReady(function() {
         var map = new OpenLayers.Map("map");
+        var room = window.location.pathname.split("/").slice(-1)[0]
         var crop_text = new OpenLayers.Layer.WMS(
             "Crop Name",
-            'http://'+ window.location.hostname + ':9999/map/a',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {
                 layers: "crop_text",
                 transparent: "true"
@@ -26,7 +27,7 @@
 
         var farm_text_field = new OpenLayers.Layer.WMS(
             "Farm name (field)",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {
                 layers: "farm_text_field",
                 transparent: "true"
@@ -40,7 +41,7 @@
 
         var farm_text = new OpenLayers.Layer.WMS(
             "Farm name (farm)",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {
                 layers: "farm_text",
                 transparent: "true"
@@ -50,7 +51,7 @@
 
         var SOC_text = new OpenLayers.Layer.WMS(
             "SOC value",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {
                 layers: "SOC_text",
                 transparent: "true"
@@ -60,7 +61,7 @@
 
         var GBI_text = new OpenLayers.Layer.WMS(
             "GBI value",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {
                 layers: "GBI_text",
                 transparent: "true"
@@ -73,25 +74,25 @@
 
         var farm_area = new OpenLayers.Layer.WMS(
             "Farm",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {layers: "farm_area"}
         );
 
         var crop_area = new OpenLayers.Layer.WMS(
             "Crop",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {layers: "crop_area"}
         );
 
         var SOC_area = new OpenLayers.Layer.WMS(
             "SOC",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {layers: "SOC_area"}
         );
 
         var GBI_area = new OpenLayers.Layer.WMS(
             "GBI",
-            'http://'+ window.location.hostname + ':8000/',
+            'http://'+ window.location.hostname + ':9999/map/' + room,
             {layers: "GBI_area"}
         );
 

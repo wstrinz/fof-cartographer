@@ -6,6 +6,12 @@ require 'open-uri'
 require 'childprocess'
 require 'cgi'
 
+require_relative 'map_process.rb'
+
+configure do
+  set :map_processes, {}
+end
+
 helpers do
   def make_map(file)
     `ruby map_maker.rb #{file}`
@@ -14,34 +20,39 @@ helpers do
   def restart_ogc(room)
     ChildProcess.posix_spawn = true
     puts "restarting ogc for room #{room}"
+    process = settings.map_processes[room] ||= MapProcess.new(room, next_port)
+    process.restart()
+    puts "process on #{process.port}"
+  end
 
-    @@ogc_pid ||= nil
-
-    if @@ogc_pid
-      @@ogc_pid.stop
-      puts "done"
-    end
-    @@ogc_pid = ChildProcess.build("./bin/ogcserver-local.py", "../rooms/#{room}/#{room}.xml")
-    @@ogc_pid.cwd = "OGCServer"
-    @@ogc_pid.start
+  def next_port
+    # return next open port
+    8000 + settings.map_processes.size
   end
 
   def room_port(room)
-    8000
+    pro = settings.map_processes[room]
+    if pro
+      puts "#{room} at port #{pro.port}"
+      pro.port
+    else
+      raise "no map process for room #{room}"
+    end
   end
 end
 
 
 get '/show/:room' do
+  restart_ogc(params[:room]) unless settings.map_processes[params[:room]]
   send_file 'views/geo-ext.html'
 end
 
 get '/map/:room' do
-  @@ogc_pid ||= nil
-  restart_ogc(params[:room]) unless @@ogc_pid
+  # @@ogc_pid ||= nil
+  restart_ogc(params[:room]) unless settings.map_processes[params[:room]]
   newp = '?' + request.env['rack.request.query_hash'].map{|k,v| "#{k}=#{v}"}.join("&")
   port = room_port(params[:room])
-  puts "localhost:8000/#{newp}"
+  # puts "localhost:#{port}/#{newp}"
   content_type "image/png"
   open("http://localhost:#{port}/#{newp}").read
 end
